@@ -5,3 +5,11 @@ Sample_name,group,genotype,treatment,sex
 998_B_cell,day2,Control,NA,Female
 24_B_cell,day1,KO,NA,Male
 9_B_cell,day1,KO,NA,Male
+68_B_cell,day3,KO,NA,Male
+33_B_cell,day3,KO,NA,Female
+30_B_cell,day3,KO,NA,Female
+82_B_cell,day3,Control,NA,Female
+77_B_cell,day3,Control,NA,Female
+44_B_cell,day3,Control,NA,Male
+85_B_cell,day3,KO,NA,Male
+83_B_cell,day3,Control,NA,Male

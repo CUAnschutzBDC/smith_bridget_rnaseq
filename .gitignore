@@ -8,3 +8,4 @@ job_stats*
 *.sif
 logs
 .Rproj.user
+*html

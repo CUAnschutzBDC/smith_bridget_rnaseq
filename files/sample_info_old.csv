@@ -1,0 +1,7 @@
+Sample_name,group,genotype,treatment,sex
+29_B_cell,day1,Control,NA,Male
+15_B_cell,day2,KO,NA,Female
+985_B_cell,day2,Control,NA,Female
+998_B_cell,day2,Control,NA,Female
+24_B_cell,day1,KO,NA,Male
+9_B_cell,day1,KO,NA,Male

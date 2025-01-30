@@ -1,0 +1,7 @@
+sample	fastq1	fastq2	data_dir
+29_B_cell	29_B_cell_S25_L008_R1_001.fastq.gz	29_B_cell_S25_L008_R2_001.fastq.gz	raw_data
+15_B_cell	15_B_cell_S23_L008_R1_001.fastq.gz	15_B_cell_S23_L008_R2_001.fastq.gz	raw_data
+985_B_cell	985_B_cell_S26_L008_R1_001.fastq.gz	985_B_cell_S26_L008_R2_001.fastq.gz	raw_data
+998_B_cell	998_B_cell_S27_L008_R1_001.fastq.gz	998_B_cell_S27_L008_R2_001.fastq.gz	raw_data
+24_B_cell	24_B_cell_S24_L008_R1_001.fastq.gz	24_B_cell_S24_L008_R2_001.fastq.gz	raw_data
+9_B_cell	9_B_cell_S22_L008_R1_001.fastq.gz	9_B_cell_S22_L008_R2_001.fastq.gz	raw_data

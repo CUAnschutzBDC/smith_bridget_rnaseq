@@ -21,15 +21,21 @@ if(normalized){
   save_path <- file.path(output_directory, "images", "gene_plots")
 }
 
+if(normalized){
+  dds_obj <- dds
+} else {
+  dds_obj <- dds_batch
+}
+
 plot <- plot_genes(gene_id = gene,
                    gene_id_list = all_gene_ids,
-                   deseq_obj = dds,
+                   deseq_obj = dds_obj,
                    intgroup = params$sample_column,
                    plot_ggplot = TRUE,
                    color = genotype_colors,
                    return_data = FALSE,
                    print = TRUE,
                    save_path = save_path,
-                   normalized = normalized,
+                   normalized = FALSE,
                    vst = vsd)
 ```

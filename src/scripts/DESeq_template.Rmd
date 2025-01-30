@@ -111,7 +111,7 @@ print(heatmap)
 
 For Gene Set Enrichment, I used `gprofiler2` It uses a hypergeometric test to determine overrepresentation of genes from different categories.
 
-```{r gse-{{name}}, fig.height = 30, fig.width = 12, eval = FALSE}
+```{r gse-{{name}}, fig.height = 30, fig.width = 12, eval = TRUE}
 all_gene_ens <- sub(".*_ENSMUSG", "ENSMUSG", rownames(dds))
 
 evcode <- TRUE
@@ -133,14 +133,25 @@ save_gost <- c("GO:BP", "GO:CC", "GO:MF", "KEGG")
 
 gost_file <- openxlsx::createWorkbook()
 
+gene_map <- setNames(
+  sapply(strsplit(rownames(dds), "_"), `[`, 1),  # extract gene names
+  sapply(strsplit(rownames(dds), "_"), `[`, 2)   # use Ensembl IDs as names
+)
 invisible(lapply(save_gost, function(x){
   save_table <- gost_table %>%
     dplyr::filter(source == x)
     
   if(evcode){
-    save_table <- save_table %>%
-      dplyr::select(!c(intersection, evidence_codes))
+    
+    # Fix Ensembl to gene id
+    save_table$DE_genes <- sapply(strsplit(save_table$intersection, ","), function(x) {
+      paste(gene_map[x], collapse = ",")
+      })
+    
+      save_table <- save_table %>%
+        dplyr::select(!c(intersection, evidence_codes))
 
+    
   }
   sheetname <- sub(":", "_", x)
   openxlsx::addWorksheet(wb = gost_file, sheetName = sheetname)
@@ -152,11 +163,11 @@ openxlsx::saveWorkbook(wb = gost_file,
                                      paste0(sect_title, "_GSE.xlsx")),
                        overwrite = TRUE)
 
-plot_grid(plots$GOBP, plots$GOMF, plots$GOCC, plots$KEGG,
-          nrow = 4,
-          ncol = 1,
-          align = "v",
-          axis = "tb")
+# plot_grid(plots$GOBP, plots$GOMF, plots$GOCC, plots$KEGG,
+#           nrow = 4,
+#           ncol = 1,
+#           align = "v",
+#           axis = "tb")
 
 ```
 
@@ -165,20 +176,20 @@ plot_grid(plots$GOBP, plots$GOMF, plots$GOCC, plots$KEGG,
 
 For Gene Set Enrichment, I used `gprofiler2` It uses a hypergeometric test to determine overrepresentation of genes from different categories.
 
-```{r gse-split-{{name}}, fig.height = 30, fig.width = 12, eval = FALSE}
+```{r gse-split-{{name}}, fig.height = 30, fig.width = 12, eval = TRUE}
 all_gene_ens <- sub(".*_ENSMUSG", "ENSMUSG", rownames(dds))
 
-ifelse(!dir.exists(file.path(params$output_dir, "GSE_files_separated")),
-       dir.create(file.path(params$output_dir, "GSE_files_separated")),
+ifelse(!dir.exists(file.path(output_directory, "GSE_files_separated")),
+       dir.create(file.path(output_directory, "GSE_files_separated")),
        FALSE)
 
 result <- run_gprofiler(gene_table = sig_genes$DE_genes,
                         pos_name = treatment,
                         neg_name = control,
                         custom_bg = all_gene_ens,
-                        save_dir = file.path(params$output_dir,
+                        save_dir = file.path(output_directory,
                                              "GSE_files_separated"),
-                        plot_dir = file.path(params$output_dir, "images",
+                        plot_dir = file.path(output_directory, "images",
                                              "GSE"),
                         evcodes = FALSE)
 
@@ -200,7 +211,8 @@ add_gost_data <- function(gost_table, gost_file, source_test,
   
   if(evcode){
     save_table <- save_table %>%
-          dplyr::select(!c(intersection, evidence_codes))
+          #dplyr::select(!c(intersection, evidence_codes))
+           dplyr::select(!c(evidence_codes))
   }
 
   sheetname <- sub(":", "_", source_test)
@@ -214,24 +226,24 @@ invisible(lapply(save_gost, function(x){
 }))
 
 openxlsx::saveWorkbook(wb = gost_file_trt,
-                       file = file.path(params$output_dir, "GSE_files_separated", 
+                       file = file.path(output_directory, "GSE_files_separated", 
                                      paste0(sect_title, "_", treatment, 
                                      "_upregulated_genes_GSE.xlsx")),
                        overwrite = TRUE)
 
 openxlsx::saveWorkbook(wb = gost_file_ctl,
-                       file = file.path(params$output_dir, "GSE_files_separated", 
+                       file = file.path(output_directory, "GSE_files_separated", 
                                      paste0(sect_title, "_", control, 
                                      "_upregulated_genes_GSE.xlsx")),
                        overwrite = TRUE)
 
-plot_grid(plots$C_GOBP, plots$T_GOBP,
-          plots$C_GOMF, plots$T_GOMF,
-          plots$C_GOCC, plots$T_GOCC,
-          plots$C_KEGG, plots$T_KEGG,
-          nrow = 8,
-          ncol = 1,
-          align = "v",
-          axis = "tb")
+# plot_grid(plots$C_GOBP, plots$T_GOBP,
+#           plots$C_GOMF, plots$T_GOMF,
+#           plots$C_GOCC, plots$T_GOCC,
+#           plots$C_KEGG, plots$T_KEGG,
+#           nrow = 8,
+#           ncol = 1,
+#           align = "v",
+#           axis = "tb")
 
 ```

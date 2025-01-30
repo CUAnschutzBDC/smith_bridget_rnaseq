@@ -1,5 +1,5 @@
 ---
-title: "klf4 and etv1 KO"
+title: "ptpn2 KO"
 author: "Kristen Wells"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output:
@@ -29,12 +29,11 @@ params:
       - ["KO", "Control"]
   genes:
     value:
-      - "Xist"
-      - "S100a8"
-      - "S100a9"
-      - "Bcl11b"
-      - "Cd3d"
-      - "Cd79a"
+      - "Tent5c"
+      - "Ighv1-36"
+      - "Cacna1e"
+      - "B3gnt4"
+      - "Ptpn2"
 ---
 
 ```{r "Load packages and set options", include = F}
@@ -50,6 +49,7 @@ library(LaCroixColoR)
 library(here)
 library(MetBrewer)
 library(pheatmap)
+library(gprofiler2)
 
 # Set default chunk options
 opts_chunk$set(
@@ -136,7 +136,7 @@ if(params$snakemake){
 ```
 
 ## Background
-This document goes through the analysis of the Chd4 KO at week 3 vs the control
+This document goes through the analysis of the PTPN2 KO
 
 ```{r, "Load in and set up data"}
 # Fix up files
@@ -240,12 +240,12 @@ names(sample_colors) <- sample_table$Sample_name
 
 
 # Cassatt 1
-treatment_colors <- met.brewer(palette_name="Cassatt1",
-                               length(unique(sample_table$treatment)),
+sex_colors <- met.brewer(palette_name="Cassatt1",
+                               length(unique(sample_table$sex)),
                                type="continuous") %>%
   as.character()
 
-names(treatment_colors) <- unique(sample_table$treatment)
+names(sex_colors) <- unique(sample_table$sex)
 
 # Egypt for mutant/control
 group_colors <- met.brewer(palette_name = "Egypt", 
@@ -395,7 +395,8 @@ Principal component analysis was performed to assess similarities between sample
 
 A) PCA colored by sample
 B) PCA colored by genotype
-C) PCA colored by treatment
+C) PCA colored by sex
+D) PCA colored by group
 
 ```{r "Run DESeq2 and create PCA plot", fig.width = 10, fig.height = 8}
 # This makes a DESeq2 object where the count data is our count matrix and the colData is our sample data. I am currently making the design based on "group" but we can change this if necessary
@@ -411,14 +412,19 @@ dds <- DESeqDataSetFromMatrix(countData = count_table,
 # Here we get rid of all the genes that are not expressed
 keep <- rowSums(counts(dds)) >= 10
 dds <- dds[keep,]
+
+# Remove day 2 because the KO appears to be WT.
+dds <- dds[ ,dds$group != "day2"]
+
 dds <- DESeq(dds)
+
 
 # This transforms the counts to have constant variance. This helps ensue that highly or lowly expressed genes will not contribute too much for the PCA or clustering analysis
 vsd <- vst(dds, blind = F)
 
 pc_1 <- plot_pca(vsd, group_by = "Sample_name", color_palette = sample_colors)
 pc_2 <- plot_pca(vsd, group_by = "genotype", color_palette = genotype_colors)
-pc_3 <- plot_pca(vsd, group_by = "treatment", color_palette = treatment_colors)
+pc_3 <- plot_pca(vsd, group_by = "sex", color_palette = sex_colors)
 pc_4 <- plot_pca(vsd, group_by = "group", color_palette = group_colors)
 
 
@@ -436,27 +442,43 @@ plot_grid(pc_1, pc_2, pc_3, pc_4,
 A) PCA colored by sample
 B) PCA colored by genotype
 C) PCA colored by day
+D) PCA colored by group
 
 ```{r "Run DESeq2 and create PCA plot batch", fig.width = 10, fig.height = 6}
 
-design(dds) <- formula(~group + genotype)
+dds_batch <- dds
 
+dds$group <- droplevels(dds$group)
+
+dds$group_sex <- paste(dds$group, dds$sex, sep = "_")
+
+adjusted_counts <- sva::ComBat_seq(
+  counts = counts(dds, normalized = FALSE),
+  #batch = dds$group_sex,
+  batch = dds$group,
+  group = dds$genotype)
+
+
+dds <- DESeqDataSetFromMatrix(countData = adjusted_counts,
+                              colData = colData(dds),
+                              design = formula(paste("~",
+                                                     params$sample_column)))
 dds <- DESeq(dds)
 # This transforms the counts to have constant variance. This helps ensue that highly or lowly expressed genes will not contribute too much for the PCA or clustering analysis
 vsd <- vst(dds, blind = F)
 
 # Fix for plotting
-mat <- assay(vsd)
-
-
-mat <- limma::removeBatchEffect(mat, vsd$group,
-                                design = model.matrix(~vsd$genotype))
-
-assay(vsd) <- mat
+# mat <- assay(vsd)
+# 
+# 
+# mat <- limma::removeBatchEffect(mat, vsd$group,
+#                                 design = model.matrix(~vsd$genotype))
+# 
+# assay(vsd) <- mat
 
 pc_1 <- plot_pca(vsd, group_by = "Sample_name", color_palette = sample_colors)
 pc_2 <- plot_pca(vsd, group_by = "genotype", color_palette = genotype_colors)
-pc_3 <- plot_pca(vsd, group_by = "treatment", color_palette = treatment_colors)
+pc_3 <- plot_pca(vsd, group_by = "sex", color_palette = sex_colors)
 pc_4 <- plot_pca(vsd, group_by = "group", color_palette = group_colors)
 
 
@@ -498,18 +520,21 @@ mod_mat <- model.matrix(design(dds), colData(dds))
 Ctl <- colMeans(mod_mat[dds$genotype == "Control", ])
 KO <- colMeans(mod_mat[dds$genotype == "KO", ])
 
-contrasts <- list(
-  "KO_Ctl" = list((KO - Ctl),
-       "Control:KO")
-  )
+# contrasts <- list(
+#   "KO_Ctl" = list((KO - Ctl),
+#        "Control:KO")
+#   )
 
+contrasts <- list(
+  "KO_Ctl" = c("KO", "Control")
+  )
 
 # compare_contrast <- FALSE
 # compare_name <- FALSE
 
 DE_chunks <- names(contrasts) %>%
  map(~knit_expand(here("src/scripts/DESeq_template.Rmd"),
-                  interaction = TRUE, name = .x))
+                  interaction = FALSE, name = .x))
 
 
 # DE_chunks <- names(contrasts) %>%

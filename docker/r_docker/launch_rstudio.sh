@@ -9,6 +9,8 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kristen.wells-wrasman@cuanschutz.edu
 
+module load python
+
 # Set up environment
 export ALPINE_SCRATCH=/gpfs/alpine1/scratch/$USER
 export APPTAINER_TMPDIR=$ALPINE_SCRATCH/apptainer_tmp
