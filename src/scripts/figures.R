@@ -72,8 +72,8 @@ p_all <- ggplot2::ggplot(data = de_res, mapping = ggplot2::aes(x = log2FoldChang
   ggplot2::geom_vline(xintercept = 0.5, linetype = "dotted") +
   ggplot2::geom_hline(yintercept = -log(0.05, 10), linetype = "dotted") +
   ggplot2::geom_vline(xintercept = -0.5, linetype = "dotted") +
-  ggrepel::geom_text_repel(data = label_genes, ggplot2::aes(label = gene_name),
-                           max.overlaps = Inf, box.padding = 0.5) +
+  ggrepel::geom_text_repel(ggplot2::aes(label = label),
+                           max.overlaps = Inf, box.padding = 0.2) +
   ggplot2::theme_classic()
   
 

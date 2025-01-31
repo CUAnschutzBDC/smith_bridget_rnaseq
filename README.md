@@ -2,8 +2,8 @@
 The scripts and pipelines used to analyze data for () manuscript.
 
 Docker images that are called in this script can be found here:
-[general_docker](https://hub.docker.com/repository/docker/kwellswrasman/rnaseq_general/general) (Version 1)
-[r_docker](https://hub.docker.com/repository/docker/kwellswrasman/rnaseq_r/) (Version 1)
+* [general_docker](https://hub.docker.com/repository/docker/kwellswrasman/rnaseq_general/general) (Version 1)
+* [r_docker](https://hub.docker.com/repository/docker/kwellswrasman/rnaseq_r/) (Version 1)
 
 
 ## Running the pipeline
