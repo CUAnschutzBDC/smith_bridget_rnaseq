@@ -1,5 +1,12 @@
 # RNA_seq analysis pipeline
-A colection of scripts and pipelines to analyze RNA seq data.
+The scripts and pipelines used to analyze data for () manuscript.
+
+Docker images that are called in this script can be found here:
+[general_docker](https://hub.docker.com/repository/docker/kwellswrasman/rnaseq_general/general) (Version 1)
+[r_docker](https://hub.docker.com/repository/docker/kwellswrasman/rnaseq_r/) (Version 1)
+
+
+## Running the pipeline
 
 A helper script to create the sample sheet and to start creating the rmats and deseq sample info can be run with 
 ```bash
@@ -56,5 +63,5 @@ Changing the profile should be the only major update to move to a different sche
 5. submit the job using `sbatch snakecharmer.sh`
 
 ## R analysis
-The file `src/scripts/DESeq_analysis.Rmd` should be used as a template for RNA-seq analysis. To follow this, you will need to decide if you need batch correction on your own data using the PCA plots generated. You will also need to design your own DE comparisons. I strongly recommend following the [tool outlined](https://github.com/tavareshugo/tutorial_DESeq2_contrasts/blob/main/DESeq2_contrasts.md) to generate your contrasts. A model for doing this is in the analysis script. I have found that this is a much more straight forward way to define your contrasts and leads to fewer mistakes. Please do not blindly follow the `DESeq_analysis.Rmd` script without understanding the steps!!!
+The file `src/scripts/DESeq_analysis.Rmd` was used for RNA-seq analysis. Figures were made with `src/scripts/figures.R`
 
